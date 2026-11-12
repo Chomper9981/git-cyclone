@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 6 52 52" width="256" height="256" fill="none">
+  <defs>
+    <clipPath id="octa"><polygon points="42.3,7.1 56.9,21.7 56.9,42.3 42.3,56.9 21.7,56.9 7.1,42.3 7.1,21.7 21.7,7.1"/></clipPath>
+  </defs>
+
+  <!-- Chỉ giữ hình bát giác: nền (màu trong lòng) bên trong, bên ngoài trong suốt -->
+  <polygon points="42.3,7.1 56.9,21.7 56.9,42.3 42.3,56.9 21.7,56.9 7.1,42.3 7.1,21.7 21.7,7.1" fill="#0B1220"/>
+
+  <!-- Khối chữ C đặc, tâm tại (32,32) = tâm icon -->
+  <polygon points="42.3,7.1 21.7,7.1 7.1,21.7 7.1,42.3 21.7,56.9 42.3,56.9 37.0,44.0 27.0,44.0 20.0,37.0 20.0,27.0 27.0,20.0 37.0,20.0" fill="#EF4444"/>
+
+  <!-- Phần bát giác còn lại (bên phải) màu đối sắc, khớp liền với khối đỏ -->
+  <polygon points="42.3,7.1 56.9,21.7 56.9,42.3 42.3,56.9 37.0,44.0 44.0,37.0 44.0,27.0 37.0,20.0" fill="#0284C7"/>
+
+  <!-- Đường chính của C -->
+  <polyline points="39.7,13.5 24.3,13.5 13.5,24.3 13.5,39.7 24.3,50.5 39.7,50.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Hai nhánh chạy hết ra mép bát giác -->
+  <g clip-path="url(#octa)" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="butt">
+    <polyline points="13.5,24.3 -23.4,9.0"/>
+    <polyline points="24.3,50.5 9.0,87.4"/>
+  </g>
+
+  <!-- Thanh G theo góc bát giác: ngang → dọc → chéo 45° -->
+  <polyline points="32,32 49,32 49,41.1 39.7,50.5" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Chấm bi chỉ ở đầu mút và giao điểm của 3 đường -->
+  <g fill="#FFFFFF">
+    <circle cx="39.7" cy="13.5" r="3.2"/>
+    <circle cx="13.5" cy="24.3" r="3.2"/>
+    <circle cx="24.3" cy="50.5" r="3.2"/>
+    <circle cx="32.0" cy="32.0" r="3.2"/>
+  </g>
+</svg>

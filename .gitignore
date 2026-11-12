@@ -1,0 +1,21 @@
+# Tài liệu — chỉ giữ trên máy, không commit (trừ README.md ở gốc: trang giới thiệu trên GitHub)
+docs/
+*.md
+!/README.md
+
+# Biến môi trường / bí mật cục bộ
+.env
+.env.*
+!.env.example
+
+# Cache công cụ (design hook)
+.impeccable/
+
+# Log
+*.log
+
+# Windows / editor
+Thumbs.db
+desktop.ini
+.idea/
+*.swp
