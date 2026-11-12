@@ -2,7 +2,7 @@
 name = "git-cyclone"
 version = "0.1.0"
 description = "Git Cyclone — manage all your local Git repositories"
-authors = ["Git Cyclone contributors"]
+authors = ["Red Cyclone"]
 license = "MIT"
 edition = "2024"
 
