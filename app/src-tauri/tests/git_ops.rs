@@ -230,3 +230,27 @@ fn push_pull_with_local_bare_remote() {
     ops::fetch(&g, None, net()).unwrap();
     ops::pull(&g, "ff-only", net()).unwrap();
 }
+
+#[test]
+fn status_hides_line_ending_only_changes() {
+    let (_d, g) = repo();
+    let gd = ops::discover(&g.cwd).unwrap().1;
+    sh(&g.cwd, &["config", "core.autocrlf", "true"]);
+    write(&g, "eol.txt", "a\r\nb\r\nc\r\n");
+    write(&g, "real.txt", "x\r\ny\r\n");
+    write(&g, "both.txt", "one\r\n");
+    ops::stage_files(&g, &["eol.txt".into(), "real.txt".into(), "both.txt".into()]).unwrap();
+    ops::commit(&g, "init", false).unwrap();
+
+    write(&g, "eol.txt", "a\nb\nc\n"); // cùng nội dung, chỉ khác kiểu xuống dòng (kích thước đổi)
+    write(&g, "real.txt", "x\ny\nz\n"); // sửa thật
+    write(&g, "both.txt", "two\r\n");
+    ops::stage_files(&g, &["both.txt".into()]).unwrap();
+    write(&g, "both.txt", "two\n"); // đã stage + worktree chỉ khác kiểu xuống dòng
+
+    let st = ops::status(&g, &gd).unwrap();
+    let find = |p: &str| st.entries.iter().find(|e| e.path == p);
+    assert!(find("eol.txt").is_none(), "phantom change must be hidden: {:?}", st.entries);
+    assert_eq!(find("real.txt").map(|e| (e.index, e.worktree)), Some(('.', 'M')));
+    assert_eq!(find("both.txt").map(|e| (e.index, e.worktree)), Some(('M', '.')));
+}

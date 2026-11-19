@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { ICONS, type IconName } from "./icons";
 
 export function Icon({ name, size = 16, stroke = 1.8, label, style }: { name: IconName; size?: number; stroke?: number; label?: string; style?: CSSProperties }) {
@@ -57,11 +57,22 @@ export function Oct({ size, color, children, className, label }: { size: number;
 const AVATAR_COLORS = ["#0284C7", "#7C3AED", "#B45309", "#047857", "#BE185D", "#0E7490"];
 
 export function Avatar({ login, url, size = 22 }: { login: string; url?: string | null; size?: number }) {
+  const [failed, setFailed] = useState<string | null>(null);
   const color = AVATAR_COLORS[[...login].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0) % AVATAR_COLORS.length];
+  // Ảnh thật: không tô nền — ảnh hiếm khi là bát giác nên nền màu lộ ra quanh ảnh trong suốt sẽ rất chướng.
+  const showImg = !!url && failed !== url;
   return (
-    <Oct size={size} color={color}>
-      {url ? (
-        <img src={`${url}${url.includes("?") ? "&" : "?"}s=${size * 2}`} width={size} height={size} alt="" className="oct-img" draggable={false} />
+    <Oct size={size} color={showImg ? "transparent" : color}>
+      {showImg ? (
+        <img
+          src={`${url}${url.includes("?") ? "&" : "?"}s=${size * 2}`}
+          width={size}
+          height={size}
+          alt=""
+          className="oct-img"
+          draggable={false}
+          onError={() => setFailed(url)}
+        />
       ) : (
         <span style={{ fontSize: Math.round(size * 0.48), fontWeight: 700, color: "#fff" }}>{login.slice(0, 1).toUpperCase()}</span>
       )}

@@ -1,3 +1,4 @@
+import logoUrl from "./assets/logo.svg";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type ReactNode } from "react";
 import { accountsOpen, avatarUrl, usableAccounts, useGitEnv } from "./Accounts";
@@ -108,14 +109,15 @@ export function SettingsView() {
           );
         })}
         <span className="spacer" />
-        <p className="dim small" style={{ margin: "14px 12px 0" }}>
+        <div className="set-brand">
+          <img src={logoUrl} width={36} height={36} alt="" draggable={false} />
+          <div>
+            <strong>Git Cyclone</strong>
+            {info.data?.version && <span className="mono dim small">v{info.data.version}</span>}
+          </div>
+        </div>
+        <p className="dim small" style={{ margin: "10px 12px 0" }}>
           {t("settings.autosave")}
-          {info.data?.version && (
-            <>
-              <br />
-              Git Cyclone {info.data.version}
-            </>
-          )}
         </p>
       </nav>
 

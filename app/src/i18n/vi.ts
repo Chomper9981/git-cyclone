@@ -43,6 +43,8 @@ const vi: Dict = {
     workspace: "Workspace",
     openRepos: "Repo đang mở",
     openRepo: "Mở repo (Ctrl+O)",
+    scrollTabsLeft: "Cuộn tab sang trái",
+    scrollTabsRight: "Cuộn tab sang phải",
     commands: "Lệnh, repo, nhánh…",
     settings: "Cài đặt",
     signIn: "Thiết lập git",

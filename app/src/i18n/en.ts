@@ -41,6 +41,8 @@ const en = {
     workspace: "Workspace",
     openRepos: "Open repositories",
     openRepo: "Open repository (Ctrl+O)",
+    scrollTabsLeft: "Scroll tabs left",
+    scrollTabsRight: "Scroll tabs right",
     commands: "Commands, repos, branches…",
     settings: "Settings",
     signIn: "Set up git",

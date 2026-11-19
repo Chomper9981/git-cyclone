@@ -2,10 +2,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { open } from "@tauri-apps/plugin-dialog";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AccountsHost, accountsOpen, avatarUrl, usableAccounts, useGitEnv } from "./Accounts";
 import { api } from "./api";
-import logoUrl from "./assets/logo.svg";
 import { CloseDialog } from "./CloseDialog";
 import { Dashboard } from "./Dashboard";
 import { setLang, t, useT } from "./i18n";
@@ -80,6 +79,33 @@ export default function App() {
   }, [qc]);
 
   const activeRepo = tabs.find((x) => x.id === active);
+  // nhiều tab hơn bề rộng thanh → luôn cuộn tab đang mở vào tầm nhìn
+  const tabsRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    tabsRef.current?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [active, tabs.length]);
+  // tab tràn → hiện mũi tên ở hai đầu (thanh cuộn bị ẩn để không tốn chiều cao)
+  const tabsWrapRef = useRef<HTMLDivElement>(null);
+  const [tabScroll, setTabScroll] = useState({ overflow: false, left: false, right: false });
+  const measureTabs = useCallback(() => {
+    const el = tabsRef.current;
+    const wrap = tabsWrapRef.current;
+    if (!el || !wrap) return;
+    // so với bề rộng khung ngoài: việc hiện/ẩn mũi tên không làm kết quả nhấp nháy
+    const next = { overflow: el.scrollWidth > wrap.clientWidth + 1, left: el.scrollLeft > 1, right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1 };
+    setTabScroll((p) => (p.overflow === next.overflow && p.left === next.left && p.right === next.right ? p : next));
+  }, []);
+  useEffect(() => {
+    const ro = new ResizeObserver(measureTabs);
+    if (tabsWrapRef.current) ro.observe(tabsWrapRef.current);
+    if (tabsRef.current) ro.observe(tabsRef.current);
+    return () => ro.disconnect();
+  }, [measureTabs]);
+  useEffect(measureTabs, [measureTabs, tabs, active, tabScroll.overflow]);
+  const scrollTabs = (dir: -1 | 1) => {
+    const el = tabsRef.current;
+    el?.scrollBy({ left: dir * Math.max(120, el.clientWidth * 0.7), behavior: "smooth" });
+  };
   useEffect(() => {
     getCurrentWindow()
       .setTitle(activeRepo ? `${activeRepo.name} — Git Cyclone` : "Git Cyclone")
@@ -167,22 +193,42 @@ export default function App() {
   return (
     <div className="app">
       <header className="titlebar">
-        <div className="brand">
-          <img src={logoUrl} width={22} height={22} alt="" draggable={false} />
-          <span>Git Cyclone</span>
-        </div>
-        <nav className="tabs" role="tablist" aria-label={tt("titlebar.openRepos")}>
-          <button role="tab" aria-selected={active === DASH} className={active === DASH ? "tab tab-ws on" : "tab tab-ws"} onClick={() => activate(DASH)}>
-            <Icon name="grid" size={15} />
-            {tt("titlebar.workspace")}
+        <button aria-current={active === DASH ? "page" : undefined} className={active === DASH ? "tab tab-ws on" : "tab tab-ws"} onClick={() => activate(DASH)}>
+          <Icon name="grid" size={15} />
+          {tt("titlebar.workspace")}
+        </button>
+        <div className="tabs-wrap" ref={tabsWrapRef}>
+        {tabScroll.overflow && (
+          <button className="tabs-arrow" disabled={!tabScroll.left} title={tt("titlebar.scrollTabsLeft")} aria-label={tt("titlebar.scrollTabsLeft")} onClick={() => scrollTabs(-1)}>
+            <Icon name="chev" size={14} style={{ transform: "rotate(180deg)" }} />
           </button>
+        )}
+        <nav
+          className="tabs"
+          role="tablist"
+          aria-label={tt("titlebar.openRepos")}
+          ref={tabsRef}
+          onScroll={measureTabs}
+          onWheel={(e) => {
+            // chuột thường chỉ có trục dọc → đổi thành cuộn ngang
+            if (!e.deltaX && e.deltaY) e.currentTarget.scrollLeft += e.deltaY;
+          }}
+        >
           {tabs.map((x) => (
             <RepoTab key={x.id} repo={x} on={active === x.id} busy={busyIds.has(x.id)} onActivate={() => activate(x.id)} onClose={() => closeTab(x.id)} onCloseOthers={() => tabs.filter((y) => y.id !== x.id).forEach((y) => closeTab(y.id))} />
           ))}
-          <button className="icon-btn" style={{ alignSelf: "center" }} title={tt("titlebar.openRepo")} aria-label={tt("titlebar.openRepo")} onClick={pickRepo}>
-            <Icon name="plus" size={16} />
-          </button>
+          <span className="tabs-add">
+            <button className="icon-btn" title={tt("titlebar.openRepo")} aria-label={tt("titlebar.openRepo")} onClick={pickRepo}>
+              <Icon name="plus" size={16} />
+            </button>
+          </span>
         </nav>
+        {tabScroll.overflow && (
+          <button className="tabs-arrow" disabled={!tabScroll.right} title={tt("titlebar.scrollTabsRight")} aria-label={tt("titlebar.scrollTabsRight")} onClick={() => scrollTabs(1)}>
+            <Icon name="chev" size={14} />
+          </button>
+        )}
+        </div>
         <button className="cmd-btn" onClick={() => paletteOpen.set(true)}>
           <Icon name="search" size={14} />
           <span>{tt("titlebar.commands")}</span>
